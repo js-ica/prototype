@@ -10,7 +10,10 @@ dotenv.config({ path: path.join(__dirname, '.env') })
 
 const app = express()
 const port = Number(process.env.PORT) || 3001
-const frontendOrigin = 'http://localhost:5173'
+const frontendOrigins = new Set([
+  'http://localhost:5173',
+  'https://prototype-iota-steel.vercel.app',
+])
 const model = process.env.GROQ_MODEL || 'openai/gpt-oss-20b'
 const cloudflareAccountId = process.env.CLOUDFLARE_ACCOUNT_ID
 const cloudflareApiToken = process.env.CLOUDFLARE_API_TOKEN
@@ -615,10 +618,11 @@ function getDuplicateAvoidanceInstruction(generated, recentIdeas) {
   return matchingFamily?.instruction || 'Avoid the previously rejected mechanism and product form. Change the central approach, not just its name or feature list.'
 }
 
+
 app.use(
   cors({
     origin(origin, callback) {
-      if (!origin || origin === frontendOrigin) {
+      if (!origin || frontendOrigins.has(origin)) {
         callback(null, true)
         return
       }
@@ -626,6 +630,8 @@ app.use(
     },
   }),
 )
+
+
 app.use(express.json({ limit: '32kb' }))
 
 app.get('/', (_request, response) => {
