@@ -733,6 +733,12 @@ app.get('/api/images/:imageName', async (request, response) => {
 
 app.post('/api/generate', limitTextGeneration, async (request, response) => {
   const body = request.body
+  const generationStartedAt = Date.now()
+
+  response.on('finish', () => {
+    console.log(`[generation] Completed with status ${response.statusCode} in ${Date.now() - generationStartedAt}ms`)
+  })
+
   if (!body || typeof body !== 'object' || Array.isArray(body)) {
     return response.status(400).json({ error: 'Request body must be a JSON object.' })
   }
